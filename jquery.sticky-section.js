@@ -1,29 +1,34 @@
 /*
  * Sticky-section plugin
  * 
- * Makes an element stick within the bounds of a container
- * TODO
- *  - test when sticky area is larger than container
+ * Makes an element stick within the bounds of its parent container
  */
-var stickify = (function ($, window) {
-    var $sticker, $container, $startStick, stopStick;
+var stickyTray = (function ($, window) {
+    var $sticker, $stickWrap, $container, settings = {};
     
     // Updates the position of the sticky element within its container
     var updatePosition = function() {
         var scrollTop = $(window).scrollTop();
+        var startStick = $container.offset().top - settings.yOffset;
+        var stopStick = $container.height() - $stickWrap.height() + startStick;
         
-        // recalculate stop stick if the window has resized and height of container has changed
-        stopStick = $container.height() - $sticker.height() + startStick;
+        // manually set width if window has resized and height of container has changed
+        $stickWrap.css("width", $sticker.width());
         
-        if (scrollTop < startStick) {
-            // remove sticky behavior
-            $sticker.css({position: 'static', top: ''});
-        } else if (scrollTop >= startStick && scrollTop <= stopStick) {
-            // position sticky element in $container
-            $sticker.css({position: "absolute", width: "100%", top: scrollTop - startStick});
-        } else if (scrollTop > stopStick) {
-            // position sticky element at bottom of $container
-            $sticker.css({position: "absolute", width: "100%", top: stopStick - startStick});
+        // if sticky region exceeds height of window and autodetect is on, don't stick so user can scroll
+        if ($stickWrap.height() + settings.yOffset > $(window).height() && settings.autoDetect === true) {
+            $stickWrap.css({position: '', top: ''});
+        } else {
+            if (scrollTop < startStick) {
+                // remove sticky behavior
+                $stickWrap.css({position: '', top: ''});
+            } else if (scrollTop >= startStick && scrollTop <= stopStick) {
+                // position sticky element in $container
+                $stickWrap.css({position: "fixed", top: settings.yOffset});
+            } else if (scrollTop > stopStick) {
+                // position sticky element at bottom of $container
+                $stickWrap.css({position: "absolute", top: stopStick - startStick});
+            }
         }
     };
     
@@ -33,29 +38,22 @@ var stickify = (function ($, window) {
      * @param conatainer    the bounding container element
      * @param yOffset   optional offset value, useful if other sticky elements exist above element
      */
-    function init(element, container, yOffset) {
+    function init(element, options) {
         $sticker = $(element);
-        $container = $(container);
-        
-        // float the element so we can calculate the height including collapsed margins of children
-        $sticker.wrap('<div class="sticky-wrap" style="position:relative; float: left"></div>');
-        
-        if ($sticker.parent().height() < $container.height()) {
-            // Scroll value when sticky behavior will begin
-            startStick = $container.offset().top - (yOffset || 0);
-            
-            // Scroll value when sticky behavior will stop
-            stopStick = $container.height() - $sticker.height() + startStick;
+        $container = $sticker.parent();
+        settings = $.extend({ yOffset: 0, autoDetect: false }, options);
+
+        if ($sticker.height() < $container.height()) {
+            // wrap contents of sticker
+            $sticker.css("position", "relative");
+            $sticker.wrapInner('<div class="sticky-wrap"></div>');
+            $stickWrap = $(".sticky-wrap", $sticker);
+            $stickWrap.css({ position: 'relative', width: '100%'});
             
             $(window).on("scroll.stickify", updatePosition);
             $(window).on("resize.stickify", updatePosition);
             
-            console.log("StartStick", startStick, "StopStick", stopStick);
-            
             updatePosition();   
-        } else {
-            // no sticky behavior needed
-            $sticker.unwrap();
         }
     }
     
@@ -63,8 +61,8 @@ var stickify = (function ($, window) {
     function destroy() {
         $(window).off("scroll.stickify");
         $(window).off("resize.stickify");
-        $sticker.css({position: 'static', width: 'auto', top: ''});
-        $sticker.unwrap();
+        $sticker.css({position: '', width: '', top: ''});
+        $("*:first", $stickWrap).unwrap();
     }
     
     return {
