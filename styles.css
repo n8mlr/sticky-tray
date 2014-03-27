@@ -1,0 +1,46 @@
+.header, .footer {
+    background-color: #cecece;
+}
+
+.header {
+    min-height: 10em;
+}
+
+.footer {
+    min-height: 30em;
+}
+
+h2 {
+    margin: 0;
+}
+
+.column-wrap:after {
+    content: " ";
+    clear: both;
+    display: block;
+}
+
+.left-column {
+    float: left;
+    width: 30%;
+}
+
+.right-column {
+    float: right;
+    width: 70%;
+}
+
+.main {
+    background-color: lime;
+    min-height: 60em;
+}
+
+.left-column .sticky-section {
+    min-height: 20em;
+    background-color: #ffbfca;
+}
+
+.right-column .sticky-section {
+    min-height: 30em;
+    background-color:maroon;
+}
