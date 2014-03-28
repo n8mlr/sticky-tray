@@ -10,7 +10,7 @@
     min-height: 30em;
 }
 
-h2 {
+h1,h2 {
     margin: 0;
 }
 
@@ -32,17 +32,16 @@ h2 {
 
 .main {
     background-color: lime;
-    min-height: 90em;
+    height: 90em;
 }
 
 .side-nav {
-    min-height: 30em;
     background-color: #ffbfca;
     box-sizing: border-box;
     padding: 1em;
 }
 
-.right-column .sticky-section {
-    min-height: 30em;
+.main-block {
+    min-height: 10em;
     background-color:maroon;
 }
