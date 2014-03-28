@@ -2,17 +2,20 @@
  * Sticky tray
  */
 (function($, window) {
+    'use strict';
     
     var instances = [],
         numInstances = 0,
         settings = {};
         
-    var PRE_SCROLL = 'preSrcoll',
-        MID_SCROLL = 'midScroll',
+    var PRE_SCROLL  = 'preSrcoll',
+        MID_SCROLL  = 'midScroll',
         POST_SCROLL = 'postScroll';
         
-    
-    function makeTray(tray) {
+    /**
+     * Creates elements necessary to plugin
+     */
+    function decorateTray(tray) {
         var $tray = $(tray),
             $wrapper;
 
@@ -23,6 +26,10 @@
         return $tray;
     }
     
+    /**
+     * Positions a tray element
+     * @param trayId (int)
+     */
     function positionTray(trayId) {
         var scrollTop = $(window).scrollTop();
         var t = instances[trayId];
@@ -59,23 +66,26 @@
     }
     
     function debounce(func, wait, immediate) {
-    	var timeout;
-    	return function() {
-    		var context = this, args = arguments;
-    		clearTimeout(timeout);
-    		timeout = setTimeout(function() {
-    			timeout = null;
-    			if (!immediate) func.apply(context, args);
-    		}, wait);
-    		if (immediate && !timeout) func.apply(context, args);
-    	};
-    };
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                timeout = null;
+                if (!immediate) func.apply(context, args);
+            }, wait);
+            if (immediate && !timeout) func.apply(context, args);
+        };
+    }
     
     /**
      * Main initializer for plugin
      *
      * @param command (Object|null)
-     *      initializes new plugin
+     *      initializes new plugin. Accepts options
+     *          yOffset(int): amount of additional y-padding to apply to sticky element
+     *          autoDetect(bool): when true, elements whose content would be invisible in the user's
+     *              browser is not made sticky
      * @param command (Object|string)
      *      when equal to 'destroy', removes plugin instances
      */
@@ -106,7 +116,7 @@
             
             return this.each(function(index, el) {
                 // Initialize each instance
-                var $tray = makeTray(el);
+                var $tray = decorateTray(el);
                 instances[numInstances++] = {
                     startStick: 0,
                     stopStick: 0,
@@ -127,7 +137,7 @@
                 t.tray.css({position: '', 'padding-top': ''});
                 $("*:first", t.child).unwrap();
             });
-            numInstaces = 0;
+            numInstances = 0;
             instances = [];
         }
     };
