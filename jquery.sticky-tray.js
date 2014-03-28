@@ -38,7 +38,7 @@
         t.stopStick = t.parent.height() - t.child.height() + t.startStick;
         
         // if sticky region exceeds height of window and autodetect is on, don't stick so user can scroll
-        if (t.child.height() + settings.yOffset > $(window).height() && settings.autoDetect === true) {
+        if (settings.autoDetect === true && t.child.height() + settings.yOffset > $(window).height()) {
             t.child.css({position: '', top: ''});
         } else {
             if (scrollTop < t.startStick) {
@@ -57,9 +57,11 @@
                 }
                 
             } else if (scrollTop > t.stopStick) {
-                // position sticky element at bottom of $container
-                t.child.css({position: "absolute", top: t.stopStick - t.startStick});
-                t.state = POST_SCROLL;    
+                if (t.state !== POST_SCROLL) {
+                    // position sticky element at bottom of $container
+                    t.child.css({position: "absolute", top: t.stopStick - t.startStick});
+                    t.state = POST_SCROLL;    
+                }
             }
         }
         instances[trayId] = t;
@@ -79,7 +81,7 @@
     }
     
     /**
-     * Main initializer for plugin
+     * Build or destroy stickyTray instances
      *
      * @param command (Object|null)
      *      initializes new plugin. Accepts options
@@ -109,7 +111,11 @@
                  $.each(instances, function(i) {
                     var t = instances[i];
                     t.child.width(t.tray.width());
-                    positionTray(i);
+                    t.startStick = t.parent.offset().top - settings.yOffset;
+                    t.stopStick = t.parent.height() - t.child.height() + t.startStick;
+                    if ($(window).scrollTop() > t.stopStick) {
+                        t.child.css({position: "absolute", top: t.stopStick - t.startStick});
+                    }
                  });
             }, 50);
             $(window).on("resize.stickyTray", resizeTray);
