@@ -22,7 +22,11 @@
         $tray.css("position", "relative");
         $tray.wrapInner('<div class="sticky-wrap"></div>');
         $wrapper = $(".sticky-wrap", $tray);
-        $wrapper.css({width: $tray.width(), position: 'relative'});
+        $wrapper.css({
+                width: $tray.width(), 
+                position: 'relative',
+                '-webkit-transform': 'translateZ(0)'
+        });
         return $tray;
     }
     
@@ -39,7 +43,8 @@
         
         // if sticky region exceeds height of window and autodetect is on, don't stick so user can scroll
         if (settings.autoDetect === true && t.child.height() + settings.yOffset > $(window).height()) {
-            t.child.css({position: '', top: ''});
+            t.child.css({ position: '', top: ''});
+            t.tray.css('padding-top', '');
         } else {
             if (scrollTop < t.startStick) {
                 if (t.state !== PRE_SCROLL) {
@@ -116,6 +121,7 @@
                     if ($(window).scrollTop() > t.stopStick) {
                         t.child.css({position: "absolute", top: t.stopStick - t.startStick});
                     }
+                    positionTray(i);
                  });
             }, 50);
             $(window).on("resize.stickyTray", resizeTray);
